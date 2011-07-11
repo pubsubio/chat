@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<script src='http://mudhub.org/g/jQuery'></script>
+		<style>
+			body, html {
+				font-family: verdana;
+				font-size: 16px;
+				height: 100%;
+				width: 100%;
+				padding: 0;
+				margin:0;
+			}
+			#main {
+				margin:auto;
+				width: 240px;
+			}
+			input {1
+				margin: 10px;
+				font-size: 16px;
+				outline: none;
+				padding: 10px;
+				border: 1px solid #ccc;
+				width: 200px;
+				display: block;
+			}			
+		</style>
+		<script>
+			$(function() {
+				$('body').keydown(function(e) {
+					$('#username').focus();					
+				});
+				$('input').focus(function() {
+					$('body').unbind('keydown');
+				});
+				$('input').keydown(function(e) {
+					var username = $('#username').val();
+					var password = $('#password').val();
+					
+					if (e.keyCode === 13 && !username) {
+						$('#username').focus();
+						return;
+					}
+					if (e.keyCode === 13 && !password) {
+						$('#password').focus();
+						return;
+					}
+					var create = function(cb) {
+						$.getJSON('/api/create?name='+username+'&password='+password, cb);						
+					};
+					var login = function(onerror) {
+						$.getJSON('/api/auth?name='+username+'&password='+password, function(res) {
+							if (res) {
+								// authtoken = res.authtoken
+								window.location = '/users?name='+username;
+								return;
+							}
+							if (onerror) {
+								onerror();								
+							}
+						});						
+					};
+					if (e.keyCode === 13) {
+						login(create(login));
+					}					
+				});
+			});
+		</script>
+		<title>In | Chat</title>
+	</head>
+	<body>
+		<div style='height:20%'></div>
+		<div id='main'>
+			<input placeholder='username' id='username'>
+			<input type='password' id='password' placeholder='password'>
+		</div>
+	</body>
+</html>

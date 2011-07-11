@@ -1,0 +1,180 @@
+<html>
+	<head>
+		<style>
+			body, html {
+				font-family: verdana;
+				font-size: 16px;
+				height: 100%;
+				width: 100%;
+				padding: 0;
+				margin:0;
+			}
+			#main {
+				margin: auto;
+				width: 600px;
+			}
+			#messages {
+				padding-top: 10px;
+				width: 600px;
+				position: absolute;
+				top: 0px;
+				bottom: 120px;
+			}
+			.message {
+				float: left;
+				max-width: 400px;
+				clear: both;
+				margin: 10 0px;
+				padding: 10px;
+				border: 1px solid #ccc;
+			}
+			.message.right {
+				border: 1px solid #aca;				
+			}
+			.right {
+				float: right;
+			}
+			#chat {
+				width: 600px;
+				position: fixed;
+				margin-top:-120px;
+				padding-top: 10px;
+			}
+			#meta {
+				color: #444;
+				padding: 2px 0;
+				height: 20px;
+			}
+			#status.offline {
+				color: #a00;
+			}
+			#status.online {
+				color: #0a0;
+			}
+			span {
+				font-size: 13px;
+			}
+			textarea {
+				resize: none;
+				outline: none;
+				height: 80px;
+				width: 100%;
+				padding: 10px;
+				font-size: 16px;
+			}
+		</style>
+		<script src='http://mudhub.org/m/jQuery,pubsub.io,extras'></script>
+
+		<script>
+			var $ = require('jQuery');
+			var extras = require('extras');
+			var pubsub = require('pubsub.io').connect(location.hostname + ':9999');
+			
+			var to = extras.getParameter('to');
+			var from = extras.getParameter('name');
+			
+			document.title = 'talking to ' + to;
+			
+			var onfrom = function(message) {
+				$('#messages .container').append($('<div class="message right"></div>').html(extras.linkify(extras.toStaticHTML(message))));
+				$('body').scrollTop($('body').prop('scrollHeight'));
+			};
+			
+			var onsend = function(message) {
+				$('#messages .container').append($('<div class="message"></div>').html(extras.linkify(extras.toStaticHTML(message))));				
+				$('body').scrollTop($('body').prop('scrollHeight'));
+			};
+			
+			var ui = {};
+									
+			var onhandshake = function(name) {				
+				var sent = [];
+				var pointer = 0;
+				
+				$('textarea').keydown(function(e) {
+					if (e.keyCode === 38) {
+						pointer = Math.max(0, pointer-1);
+						$('textarea').val(sent[pointer] || '');
+					}
+					else if (e.keyCode === 40) {
+						pointer = Math.min(sent.length, pointer+1);
+						$('textarea').val(sent[pointer] || '');
+					}
+					else if (e.keyCode !== 13 || e.altKey || e.shiftKey) {
+						return;
+					}
+					else if (extras.isBlank($('textarea').val())) {
+						return false;
+					}
+					
+					var message = $('textarea').val();
+					
+					sent.push(message);
+					pointer = sent.length;
+					
+					pubsub.publish({
+						to:to, 
+						from:name,
+						message:message
+					});
+					
+					$('textarea').val('');
+					
+					return false;
+				});
+
+				// my messages
+				pubsub.subscribe({
+					from: name,
+					to:to,
+					message: {$haskey:1}
+				}, function(doc) {
+					onsend(doc.message);
+				});
+				
+				// his messages
+	        	pubsub.subscribe({
+					to: name,
+					from:to,
+					message:{$haskey:1}
+				}, function(doc) {
+					onfrom(doc.message);
+	           	});		
+			};		
+			
+			$(function() {
+				$('body').keydown(function(e) {
+					$('textarea').focus();
+					return e.keyCode !== 13 || e.altKey || e.shiftKey;
+				});
+				$('#user').text(to.value);
+
+				$.getJSON('/api/conversation?to=' + extras.getParameter('to') + "&name=" + extras.getParameter('name'), function(messages) {
+					for (var i = messages.length-1; i >= 0; i--) {
+						if (messages[i].to === to) {
+							onsend(messages[i].message);
+							continue;
+						}
+						onfrom(messages[i].message);
+					}
+					onhandshake(extras.getParameter('name'));
+				});
+				
+				return false;
+			});
+		</script>
+	</head>
+	<body>
+		<div id='main'>
+			<div id='messages'>
+				<div class='container'></div>
+				<div style='height:120px; clear:both;'></div>
+			</div>
+			<div style='height:100%'></div>
+			<div id='chat' style='background-color:white; height:120px;'>
+				<div id='meta'></div>
+				<textarea placeholder='type to talk'></textarea>
+			</div>
+		</div>
+	</body>
+</html>

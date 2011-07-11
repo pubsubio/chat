@@ -1,0 +1,63 @@
+<html>
+	<head>
+		<script src='http://mudhub.org/m/jQuery'></script>
+		<style>
+			body, html {
+				font-family: verdana;
+				font-size: 16px;
+				height: 100%;
+				width: 100%;
+				padding: 0;
+				margin:0;
+			}
+			#main {
+				margin:auto;
+				width: 240px;
+			}
+			a {
+				display: block;
+				color: inherit;
+				text-decoration: none;
+				margin: 10px;
+				padding: 10px;
+				border: 1px solid #ccc;
+				width: 180px;
+			}
+			a:hover {
+				border: 1px solid #aca;				
+			}
+			input {
+				margin: 10px;
+				font-size: 16px;
+				outline: none;
+				padding: 10px;
+				border: 1px solid #ccc;
+				width: 200px;
+			}
+		</style>
+		<script>
+			var $ = require('jQuery');
+			
+			$(function() {
+				//var token = (''+location).split('authtoken=')[1].split('&')[0];
+				var username = (''+location).split('name=')[1].split('&')[0]
+				
+				$.getJSON('/api/users', function(users) {
+					for(var i = 0; i < users.length; i++) {
+						var href = '/chat?name='+username+'&to='+users[i].name;
+						
+						if (users[i].name === username) {
+							continue;
+						}
+						$('#main').append('<a href="'+href+'">'+users[i].name+'</a>');
+					}
+				});
+			});
+		</script>
+		<title>who do you wanna talk to?</title>
+	</head>
+	<body>
+		<div style='height:20%'></div>
+		<div id='main'></div>
+	</body>
+</html>
