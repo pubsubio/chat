@@ -1,0 +1,7 @@
+{
+	"hub": {
+		"web": "hub.pubsub.io",
+		"server": "hub.pubsub.io"
+	},
+	"db":"mongodb://root:root@flame.mongohq.com:27108/chat"
+}

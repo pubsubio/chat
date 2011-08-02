@@ -1,0 +1,41 @@
+<html>
+	<head>
+		<!--[if lt IE 9]>
+	  	<script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	  	<![endif]-->
+		<script src='http://mudhub.org/g/jQuery'></script>
+		<style>
+		#top {
+			height: 20px;
+			overflow:hidden;
+		}
+		#in {
+			height:20px;
+		}
+		</style>
+		<script>
+			$(function() {				
+				$('#register').css({'position':'absolute','z-index':1});
+				$('#input').css({'position':'absolute','margin-left':90});
+				$('#login').css('margin-left',360);
+				
+				$('#login').click(function() {
+					$('#user').animate({'margin-top':-20});
+				})
+				$('#register').click(function() {
+					$('#register').animate({'margin-left':270}, 300);
+					$('#input').animate({'margin-left':0}, 300);
+					// todo: update tab index
+				});
+			});
+		</script>
+		<title>In | Chat</title>
+	</head>
+	<body>
+		<div style='height:20%'></div>
+		<div id='top'>
+			<div id='in'><span id='register'><button>Register</button> or </span><span id='input'><input placeholder='username' id='username'> <input type='password' id='password' placeholder='password'></span><button id='login'>login</button></div>
+			<div id='user'>ian jorgensen</div>
+		</div>
+	</body>
+</html>

@@ -63,12 +63,12 @@
 				font-size: 16px;
 			}
 		</style>
-		<script src='http://mudhub.org/m/jQuery,pubsub.io,extras'></script>
-
+		<script src='http://mudhub.org/m/jQuery,extras'></script>
+		<script src='/js/pubsub.io.js'></script>
 		<script>
 			var $ = require('jQuery');
 			var extras = require('extras');
-			var pubsub = require('pubsub.io').connect(location.hostname + ':9999');
+			var pubsub = pubsubio.connect('<%= hub.web %>');
 			
 			var to = extras.getParameter('to');
 			var from = extras.getParameter('name');
